@@ -1,7 +1,7 @@
 //files
 const methods = require("./methods")
 const config = require("./config")
+const database = require("./database.js")
 //modules
 const discord = require("discord")
-
-const mongoose = require('mongoose');
+console.log(database)
