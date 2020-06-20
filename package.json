@@ -1,0 +1,24 @@
+{
+  "name": "Lords-of-Underground",
+  "version": "1.0.0",
+  "description": "This is a mafia discord bot # Features - Live leaderboard - gang system - simulate crime in the 1930s America - gain wealth - inject life into your discord server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eulerthedestroyer/Lords-of-Underground.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eulerthedestroyer/Lords-of-Underground/issues"
+  },
+  "homepage": "https://github.com/eulerthedestroyer/Lords-of-Underground#readme",
+  "dependencies": {
+    "discord": "^0.8.2",
+    "mongoose": "^5.9.19"
+  }
+}

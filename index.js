@@ -4,3 +4,4 @@ const config = require("./config")
 //modules
 const discord = require("discord")
 
+const mongoose = require('mongoose');
