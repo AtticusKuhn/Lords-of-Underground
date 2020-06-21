@@ -19,6 +19,7 @@
   "homepage": "https://github.com/eulerthedestroyer/Lords-of-Underground#readme",
   "dependencies": {
     "discord": "^0.8.2",
+    "discord.js": "^12.2.0",
     "mongoose": "^5.9.19"
   }
 }
