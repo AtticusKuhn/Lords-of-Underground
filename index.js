@@ -58,6 +58,9 @@ db.once('open',()=>{
                 }
                 msg.reply(result.msg)
             }
+            if(command == "help"){
+                msg.reply(JSON.stringify(config.commands, null, 4))
+            }
 
         }
     });
