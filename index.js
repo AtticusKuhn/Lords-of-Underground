@@ -40,7 +40,7 @@ db.once('open',()=>{
                 return
             }
             if(command == "balance"){
-                let balance_result= await database.get_balance(msg.author.id,Person)
+                let balance_result= await database.get_balance(msg.author.id,Person, msg_array[1])
                 console.log(balance_result)
                 if(!balance_result.success){
                     msg.reply(balance_result.msg)
@@ -61,7 +61,44 @@ db.once('open',()=>{
             if(command == "help"){
                 msg.reply(JSON.stringify(config.commands, null, 4))
             }
+            if(command.startsWith( "start")){
+                console.log("start")
+                if(config.gang_name.test(msg_array[1])){
+                    console.log(database.start_gang)
+                    let result = await database.start_gang(msg.author.id, Person)
+                    if(!result.success){
+                        msg.reply(result.msg)
+                    }else{
+                        console.log(result)
+                        let role = await msg.guild.roles.create({
+                            data: {
+                                name:msg_array[1] ,
+                                color: 'BLUE',
+                            }
+                        })
+                        msg.guild.member(msg.author).roles.add(role.id);
+                        // Create a new channel with permission overwrites
+                        msg.guild.channels.create(msg_array[1].toLowerCase(), {
+                        type: 'text',
+                        permissionOverwrites: [
+                            {
+                            id: msg.author.id,
+                            allow: ['SEND_MESSAGES', "READ_MESSAGES"],
+                            },
+                        ],
+                        })
+                    }
 
+                }else{
+                    msg.reply("invalid gang name. must be /^[a-zA-Z0-9-]{2,14}$/")
+                }
+            }
+            if(command == "profile"){
+                let result = await database.find_person(msg.author.id,Person)
+                if(result.success){
+                    msg.reply(JSON.stringify(result.user,null,4))
+                }
+            }
         }
     });
 

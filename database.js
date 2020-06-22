@@ -42,7 +42,7 @@ function create(id,name, Person){
                             id: id.toString(),
                             money: 1000,
                             items: [],
-                            gang: "none",
+                            gang: "",
                             arrested:false,
                             notoriety: 0
                         }
@@ -63,12 +63,58 @@ function create(id,name, Person){
     })
 }
 
+function start_gang(id, Person,gang_name){
+    console.log("start_gang")
+    return new Promise((res, rej) => {
+        Person.findOne({ id: id.toString() }, (err,user)=>{
+            if(user == null){
+                res({
+                    success:false,
+                    msg:"don't exist"
+                })
+            }else{
+                if(user.gang != "" && user.gang != "none" ){
+                    res({
+                        success:false,
+                        msg:"you're already in a gang"
+                    })
+                Person.updateOne({ id: id.toString() }, { gang: gang_name  });
+                }else{
+                    res({
+                        success:true
+                    })
+                }
+            }
+        })
+    })
+}
+
+function find_person(id,Person){
+    return new Promise((res, rej) => {
+        Person.findOne({ id: id.toString() }, (err,user)=>{
+            if(user == null){
+                res({
+                    success:false,
+                    msg:"don't exist"
+                })
+            }else{
+                res({
+                    success:true,
+                    user:user
+                })
+            }
+        })
+    }) 
+}
+
 function init(database){
     console.log(database)
 }
 module.exports = {
     get_balance,
-    create
+    create,
+    start_gang,
+    find_person
 }
 
 
