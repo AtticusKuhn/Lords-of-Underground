@@ -19,8 +19,25 @@ const config = {
         "profile":{
             desc:"see your profile",
             args:0
+        },
+        "extort":{
+            desc:"extort a business for money",
+            args:0
+        },
+        "make":{
+            desc:"create illicit substances such as guns or drugs",
+            args:1
         }
     },
-    gang_name:/^[a-z0-9-]{2,14}$/
+    items:{
+        gun:{
+            desc:"can shoot",
+            make_coolown:100,
+            use_cooldown:100
+        }
+    },
+    gang_name:/^[a-z0-9-]{2,14}$/,
+    extort_cooldown:10000,
+    exort_payoff: Math.floor(Math.random()*10+10)
 }
 module.exports = config

@@ -19,7 +19,8 @@ db.once('open',()=>{
         items: Array,
         gang: String,
         arrested:Boolean,
-        notoriety: Number
+        notoriety: Number,
+        cooldown: Object,
     });
     const Person = mongoose.model('Person', person_schema);
 //start bot
@@ -98,6 +99,14 @@ db.once('open',()=>{
                 if(result.success){
                     msg.reply(JSON.stringify(result.user,null,4))
                 }
+            }
+            if(command == "extort"){
+                let result = await database.extort(msg.author.id,Person)
+                msg.reply(result.msg)
+            }
+            if(command.startsWith("make")){
+                let result = await database.make(msg.author.id ,Person, msg_array[1])
+                msg.reply(result.msg)
             }
         }
     });
