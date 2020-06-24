@@ -284,7 +284,7 @@ async function sell(amount ,item  ,price, person,Offer, Person){
         msg:"your offer has been posted"
     }
 }
-function accept(offer_id, person, Person, Offer){
+async function accept(offer_id, person, Person, Offer){
     let found_offer = await Offer.findOne({ short_id: offer_id })
     if(found_offer == null){
         return{
@@ -298,12 +298,39 @@ function accept(offer_id, person, Person, Offer){
             msg:"you don't have enough money"
         }
     }
-    if(found_offer.amount < 0  methods.array_frequency(person.items)[item] < Math.abs(amount )){
+    if(found_offer.amount < 0 && methods.array_frequency(person.items)[found_offer.item] < Math.abs(found_offer.amount) ){
         return  {
             success:false,
-            
+            msg:"you don't have enough of the item"
+
         }
     }
+     if(found_offer.cost < 0){
+        await Person.updateOne({ id: person.id}, {
+            money: person.money-found_offer.cost,
+            items:[...person.items, Array(found_offer.amount).fill(found_offer.item) ]
+        });
+        await Person.updateOne({id:found_offer.author.id},{
+            money: found_offer.author.moeny+ found_offer.cost
+        })
+
+    }
+    if( found_offer.amount > 0 ){
+         await Person.updateOne({ id: person.id}, {
+            items: methods.remove_n(person.items, found_offer.item, found_offer.amount),
+            money:  person.money+found_offer.cost
+        });
+        console.log(found_offer.author.id)
+        await Person.updateOne({id:found_offer.author.id},{
+            items: [...found_offer.author.items, Array(found_offer.amount).fill(found_offer.item) ]
+        })
+    }
+    await Offer.deleteOne({short_id:found_offer.short_id})
+    return{
+        success:true,
+        msg:"you accepted the offer"
+    }
+
 
 
 }

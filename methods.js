@@ -15,6 +15,7 @@ function remove_n(array , thing, amount){
             amount--
         }
     }
+    return array
 }
 
 module.exports ={

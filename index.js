@@ -10,7 +10,7 @@ const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_LINK, {useNewUrlParser: true});
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open',()=>{
+db.once('open',async ()=>{
     // we're connected!
     const person_schema = new mongoose.Schema({
         name: String,
@@ -32,6 +32,7 @@ db.once('open',()=>{
         short_id:String
     });
     const Offer = mongoose.model('Offer', market_offer);
+
 //start bot
     client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -146,6 +147,7 @@ db.once('open',()=>{
             }
             if(command.startsWith("accept")){
                 let result = await database.accept(msg_array[1], person, Person, Offer)
+                msg.reply(result.msg)
             }
         }
     });
