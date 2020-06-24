@@ -1,4 +1,9 @@
+const crypto = require("crypto")
+
 const config = require("./config")
+const methods = require("./methods")
+
+
 function get_balance(user_id,Person){
     return new Promise((res, rej) => {
         Person.findOne({ id: user_id.toString() }, (err,user)=>{
@@ -44,7 +49,10 @@ function create(id,name, Person){
                             items: [],
                             gang: "",
                             arrested:false,
-                            notoriety: 0
+                            notoriety: 0,
+                            name: String,
+                            cooldown:{},
+                            level:0
                         }
                     }
                 }]).then(result=>{
@@ -145,6 +153,12 @@ async function make(id ,Person, item){
             msg:"invalid item"
         }
     }
+    if(!config.items[item].makeable){
+        return{
+            success:false,
+            msg:"that item cannot be made"
+        }
+    }
     let person = await find_person(id,Person)
     if(!person.success){
         return{
@@ -177,13 +191,132 @@ async function make(id ,Person, item){
 function init(database){
     console.log(database)
 }
+async function increase_level(id, Person){
+    let person = await find_person(id,Person)
+    if(!person.success){
+        return{
+            success:false,
+            msg:"can't find"
+        }
+    }
+    person = person.user
+    if(new Date().getTime() - person.cooldown.level < config.level_cooldown ){
+        return {
+            success:false,
+            msg:"wait a bit longer"
+        }
+    }
+    let person_level = person.level
+    if(!person_level){
+        person_level = 1
+    }else{
+        person_level += Math.random()*0.3+0.1
+    }
+    let cd = person.cooldown
+    cd.level = new Date().getTime()
+    await Person.updateOne({ id: person.id}, {
+        level: person_level,
+        cooldown:cd
+    })
+}
+async function sell(amount ,item  ,price, person,Offer, Person){
+    if(!config.items[item]){
+        return{
+            success:false,
+            msg:"invalid item name"
+        }
+    }
+    if( isNaN(amount) || isNaN(price)){
+        return{
+            success:false,
+            msg:"invalid number"
+        }
+    }
+    amount = Number(amount)
+    price = Number(price)
+    if(price == 0 || amount ==0){
+        return{
+            success:false,
+            msg:"cannot be 0"
+        }
+    }
+    if(Math.sign(price) != Math.sign(amount)){
+        return{
+            success:false,
+            msg:"price and amount must havae the same sign"
+        }
+    }
+    if(price > 0 && person.money< price ){
+        return{
+            success:false,
+            msg:"you don't have enough money"
+        }
+    }
+    if(amount < 0 && methods.array_frequency(person.items)[item] < amount ){
+        return {
+            success:false,
+            msg:"you don't have enough of the item to sell"
+        }
+    }
+    if(price > 0){
+        await Person.updateOne({ id: person.id}, {
+            money: person.money-price
+        });
+    }
+    if( amount < 0 ){
+         await Person.updateOne({ id: person.id}, {
+            items: methods.remove_n(person.items, item, amount)
+        });
+    }
+     Offer.bulkWrite([{
+        insertOne: {
+            document: {
+            author: person,
+            item: item,
+            cost: price,
+            amount: amount,
+            short_id:crypto.randomBytes(3).toString("hex")
+            }
+        }
+    }])
+    return {
+        success:true,
+        msg:"your offer has been posted"
+    }
+}
+function accept(offer_id, person, Person, Offer){
+    let found_offer = await Offer.findOne({ short_id: offer_id })
+    if(found_offer == null){
+        return{
+            success:false,
+            msg:"can't find that offer"
+        }
+    }
+    if(found_offer.cost > 0  && person.money <found_offer.cost  ){
+        return {
+            success:false,
+            msg:"you don't have enough money"
+        }
+    }
+    if(found_offer.amount < 0  methods.array_frequency(person.items)[item] < Math.abs(amount )){
+        return  {
+            success:false,
+            
+        }
+    }
+
+
+}
 module.exports = {
     get_balance,
     create,
     start_gang,
     find_person,
     extort,
-    make
+    make,
+    increase_level,
+    sell,
+    accept
 }
 
 

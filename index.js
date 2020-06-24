@@ -21,8 +21,17 @@ db.once('open',()=>{
         arrested:Boolean,
         notoriety: Number,
         cooldown: Object,
+        level:Number
     });
     const Person = mongoose.model('Person', person_schema);
+    const market_offer = new mongoose.Schema({
+        author: String,
+        item: String,
+        cost: Number,
+        amount: Number,
+        short_id:String
+    });
+    const Offer = mongoose.model('Offer', market_offer);
 //start bot
     client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -35,10 +44,20 @@ db.once('open',()=>{
         const msg_array = msg.content.split(" ")
         const command =msg_array[0]
         //valid command
+        database.increase_level(msg.author.id, Person)
         if(Object.keys(config.commands).includes(command)){
             if(msg_array.length-1 !=config.commands[command].args ){
                 msg.reply("invalid number of arguments")
                 return
+            }
+            let person = await database.find_person(msg.author.id,Person)
+            if(!person.success){
+                msg.reply("you don't have an account")
+                return
+            }
+            person = person.user
+            if(config.commands[command].level_requirement > person.level){
+                msg.reply(`you must be of level ${config.commands[command].level_requirement}, but you are only at level, ${person.level} `)
             }
             if(command == "balance"){
                 let balance_result= await database.get_balance(msg.author.id,Person, msg_array[1])
@@ -107,6 +126,26 @@ db.once('open',()=>{
             if(command.startsWith("make")){
                 let result = await database.make(msg.author.id ,Person, msg_array[1])
                 msg.reply(result.msg)
+            }
+            if(command =="market"){
+               // let result = await database.get_market(Person,Offer)
+                if(Offer.find({}).toString() =="" ){
+                    msg.reply("no offers currently, put one up to see it here")
+                }else{
+                    let result = "\n"
+                    for await (const doc of Offer.find()) {
+                        result +=`Offer ${doc.short_id} : ${doc.amount} ${doc.item} for ${doc.cost}\n`
+                    }
+                   // console.log(Offer.find({}))
+                    msg.reply(result)
+                }
+            }
+            if(command.startsWith("sell")){
+                let result = await database.sell(msg_array[1],msg_array[2] ,msg_array[3],person,Offer,Person)
+                msg.reply(result.msg)
+            }
+            if(command.startsWith("accept")){
+                let result = await database.accept(msg_array[1], person, Person, Offer)
             }
         }
     });
