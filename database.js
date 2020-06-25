@@ -285,8 +285,19 @@ async function sell(amount ,item  ,price, person,Offer, Person){
     }
 }
 async function accept(offer_id, person, Person, Offer){
+    console.log(offer_id, "offer_id")
     let found_offer = await Offer.findOne({ short_id: offer_id })
-    if(found_offer == null){
+  //  found_offer.author = found_offer.author.replace(/:/g,'":')
+    //found_offer.author = found_offer.author.replace(/\n/g,'\n"')
+    found_offer.author = found_offer.author.replace(/[\da-f]{19,30}/g,'""')
+
+   // found_offer.author = found_offer.author.substring(0)
+    console.log(found_offer.author, eval('(' + found_offer.author + ')'))
+    found_offer.author = eval('(' + found_offer.author + ')');
+    let parsed_author  =eval('(' + found_offer.author + ')')
+
+    console.log(parsed_author.items,"is the items")
+    if(found_offer == null || found_offer ==undefined  || !found_offer){
         return{
             success:false,
             msg:"can't find that offer"
@@ -310,8 +321,8 @@ async function accept(offer_id, person, Person, Offer){
             money: person.money-found_offer.cost,
             items:[...person.items, Array(found_offer.amount).fill(found_offer.item) ]
         });
-        await Person.updateOne({id:found_offer.author.id},{
-            money: found_offer.author.moeny+ found_offer.cost
+        await Person.updateOne({id:parsed_author.id},{
+            money: parsed_author.moeny+ found_offer.cost
         })
 
     }
@@ -320,9 +331,9 @@ async function accept(offer_id, person, Person, Offer){
             items: methods.remove_n(person.items, found_offer.item, found_offer.amount),
             money:  person.money+found_offer.cost
         });
-        console.log(found_offer.author.id)
-        await Person.updateOne({id:found_offer.author.id},{
-            items: [...found_offer.author.items, Array(found_offer.amount).fill(found_offer.item) ]
+        console.log(parsed_author.id)
+        await Person.updateOne({id:parsed_author.id},{
+            items: [...parsed_author.items, ...Array(found_offer.amount).fill(found_offer.item) ]
         })
     }
     await Offer.deleteOne({short_id:found_offer.short_id})
