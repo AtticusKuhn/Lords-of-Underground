@@ -51,7 +51,7 @@ const config = {
         "info":{
             desc:`
                 This bot was designed by eulerthedestroyer#2074 and thought of by TheB2#3417. \n Bot invite link - https://discord.com/oauth2/authorize?scope=bot&client_id=723983871770755123&permissions=268470288
-                Server invite link - https://discord.gg/6ZEKA3 .
+                Server invite link - https://discord.gg/TBaXkWg.
                 eulerthedestroyer06/20/2020
                 Github repository link - https://github.com/eulerthedestroyer/Lords-of-Underground
             `,

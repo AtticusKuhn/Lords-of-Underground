@@ -35,7 +35,9 @@ db.once('open',async ()=>{
 
 //start bot
     client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}!`);
+        console.clear()
+        console.log(`Logged in as ${client.user.tag}!`);
+        setInterval(()=>{database.decrease_notoriety(Person)},3600e3)
     });
     //bot recieves a message
     client.on('message', async (msg) => {
@@ -164,6 +166,10 @@ db.once('open',async ()=>{
             }
             if(command.startsWith("accept")){
                 let result = await database.accept(msg_array[1], person, Person, Offer)
+                msg.reply(result.msg)
+            }
+            if(command.startsWith("bribe")){
+                let result = await database.bribe(person,Person, msg_array[1])
                 msg.reply(result.msg)
             }
         }

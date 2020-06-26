@@ -378,6 +378,54 @@ async function arrest(person, Person){
     }
     return false
 }
+async function decrease_notoriety(Person){
+    for await (const person of Person.find()) {
+        if(person.notoriety > 4){
+            await Person.updateOne({ id: person.id}, {
+                notoriety: person.notoriety-0.3,
+            });
+            if(person.notoriety < 4 && person.arrested){
+            await Person.updateOne({ id: person.id}, {
+                arrested: false,
+            });
+            }
+        }
+    }
+}
+async function bribe(person, Person, amount){
+    if(isNaN(amount)){
+        return{
+            success:false,
+            msg:"not a valid number"
+        }
+    }
+    amount= parseInt(amount)
+    if(amount <= 0 ){
+        return{
+            success:false,
+            msg:"bribe can't be negtive"
+        }
+    }
+    if(person.money < amount ){
+        return{
+            success:false,
+            msg:"you don't have enough money"
+        }
+    }
+    await Person.updateOne({ id: person.id}, {
+        money: money - amount,
+        notoriety: Math.min(0, amount/30)
+    });
+    if(person.arrested && person.notoreity < 4){
+    await Person.updateOne({ id: person.id}, {
+        arrested: false
+    });
+    return{
+        success:true,
+        msg:"you sucessfully bribed the police"
+    }
+    }
+}
 module.exports = {
     get_balance,
     create,
