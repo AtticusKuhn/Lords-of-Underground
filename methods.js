@@ -1,3 +1,5 @@
+const config = require("./config")
+
 function array_frequency(arr){
     //var arr = [5, 5, 5, 2, 2, 2, 2, 2, 9, 4];
     var counts = {};
@@ -17,8 +19,16 @@ function remove_n(array , thing, amount){
     }
     return array
 }
+function get_rank_name(level){
+    return config.rank_names[Math.min(Math.floor(level/3), 6)] 
+}
+function random_array(array){
+    return array[Math.floor(Math.random()*array.length)]
+}
 
 module.exports ={
     array_frequency,
-    remove_n
+    remove_n,
+    get_rank_name,
+    random_array
 }

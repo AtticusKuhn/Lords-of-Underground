@@ -57,9 +57,22 @@ db.once('open',async ()=>{
                 return
             }
             person = person.user
-            if(config.commands[command].level_requirement > person.level){
-                msg.reply(`you must be of level ${config.commands[command].level_requirement}, but you are only at level, ${person.level} `)
+
+            if(config.commands[command].level > person.level){
+                msg.reply(`Insufficent levels: you must be of rank ${config.commands[command].level} ${methods.get_rank_name(config.commands[command].level)}, but you are only at rank, ${person.level} ${methods.get_rank_name(person.level)}`)
+                return
             }
+            if(person.arrested && config.illicit_commands.indexOf(command) > -1){
+                msg.reply("you cannot do illicit activities while you are arrested")
+                return
+            }
+            //background services
+            database.add_fake_offer(Offer)
+            if(await database.arrest(person, Person)){
+                msg.reply("you have been arrested")
+                return
+            }
+            
             if(command == "balance"){
                 let balance_result= await database.get_balance(msg.author.id,Person, msg_array[1])
                 console.log(balance_result)
@@ -80,7 +93,7 @@ db.once('open',async ()=>{
                 msg.reply(result.msg)
             }
             if(command == "help"){
-                msg.reply(JSON.stringify(config.commands, null, 4))
+                msg.reply(JSON.stringify(config.commands, null, 4).replace(/level/g,"rank"))
             }
             if(command.startsWith( "start")){
                 console.log("start")
@@ -117,7 +130,11 @@ db.once('open',async ()=>{
             if(command == "profile"){
                 let result = await database.find_person(msg.author.id,Person)
                 if(result.success){
-                    msg.reply(JSON.stringify(result.user,null,4))
+                    let formatted = JSON.parse(JSON.stringify(result.user))
+                    formatted.rank = `rank ${formatted.level} ${methods.get_rank_name(formatted.level)}`
+                    console.log(formatted)
+                    delete  formatted.level
+                    msg.reply(JSON.stringify(formatted,null,4))
                 }
             }
             if(command == "extort"){

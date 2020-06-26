@@ -174,6 +174,14 @@ async function make(id ,Person, item){
         }
         
     }
+    for (const requirement of config.items[item].item_requirements){
+        if(person.items.indexOf(requirement) < 0){
+            return{
+                success:false,
+                msg:`you must have ${requirement} in order to make this`
+            }
+        }
+    }
     let cd = person.cooldown
     cd[item] = new Date().getTime()
     await Person.updateOne({ id: person.id}, {
@@ -341,9 +349,34 @@ async function accept(offer_id, person, Person, Offer){
         success:true,
         msg:"you accepted the offer"
     }
-
-
-
+}
+async function add_fake_offer(Offer){
+    if(Math.random() > config.add_fake_offer_probablility){
+        const price= Math.floor(Math.random()*40+80)
+        const amount = Math.floor(Math.random()*5+7)
+        const item = methods.random_array(Object.keys(config.items))
+        Offer.bulkWrite([{
+            insertOne: {
+                document: {
+                author: "bot",
+                item: item,
+                cost: price,
+                amount: amount,
+                short_id:crypto.randomBytes(3).toString("hex")
+                }
+            }
+        }])
+    }
+}
+async function arrest(person, Person){
+    if(Math.random()*person.notoriety-3 > config.arrest_probability){
+        await Person.updateOne({ id: person.id}, {
+            notoriety: person.notoriety-1,
+            arrested:true
+        });
+        return true
+    }
+    return false
 }
 module.exports = {
     get_balance,
@@ -353,8 +386,10 @@ module.exports = {
     extort,
     make,
     increase_level,
+    add_fake_offer,
     sell,
-    accept
+    accept,
+    arrest
 }
 
 
