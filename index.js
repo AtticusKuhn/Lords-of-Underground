@@ -2,6 +2,7 @@
 const methods = require("./methods")
 const config = require("./config")
 const database = require("./database.js")
+require("./server.js")()
 //modules
 const Discord = require('discord.js');
 const client = new Discord.Client();
@@ -70,11 +71,12 @@ db.once('open',async ()=>{
             }
             //background services
             database.add_fake_offer(Offer)
-            if(await database.arrest(person, Person)){
-                msg.reply("you have been arrested")
-                return
+            if(config.illicit_commands.indexOf(command) > -1){
+                if(await database.arrest(person, Person)){
+                    msg.reply("you have been arrested")
+                    return
+                }
             }
-            
             if(command == "balance"){
                 let balance_result= await database.get_balance(msg.author.id,Person, msg_array[1])
                 console.log(balance_result)

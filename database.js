@@ -413,17 +413,17 @@ async function bribe(person, Person, amount){
         }
     }
     await Person.updateOne({ id: person.id}, {
-        money: money - amount,
+        money: person.money - amount,
         notoriety: Math.min(0, amount/30)
     });
-    if(person.arrested && person.notoreity < 4){
-    await Person.updateOne({ id: person.id}, {
-        arrested: false
-    });
+    if(person.arrested && person.notoriety < 4){
+        await Person.updateOne({ id: person.id}, {
+            arrested: false
+        });
+    }
     return{
         success:true,
         msg:"you sucessfully bribed the police"
-    }
     }
 }
 module.exports = {
@@ -437,7 +437,8 @@ module.exports = {
     add_fake_offer,
     sell,
     accept,
-    arrest
+    arrest,
+    bribe
 }
 
 
