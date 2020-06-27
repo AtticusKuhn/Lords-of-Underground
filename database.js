@@ -71,7 +71,7 @@ function create(id,name, Person){
     })
 }
 
-function start_gang(id, Person,gang_name){
+function start_gang(id, Person,  gang_id){
     console.log("start_gang")
     return new Promise((res, rej) => {
         Person.findOne({ id: id.toString() }, (err,user)=>{
@@ -81,18 +81,21 @@ function start_gang(id, Person,gang_name){
                     msg:"don't exist"
                 })
             }else{
-                if(user.gang != "" && user.gang != "none" ){
-                    Person.updateOne({ id: id.toString() }, { gang: gang_name  }).then(_=>{
+               // if(user.gang != "" && user.gang != "none" ){
+                    Person.updateOne({ id: id.toString() }, { 
+                        gang: gang_id  
+                    })
+                    .then(()=>{
                         res({
-                            success:false,
-                            msg:"you're already in a gang"
+                            success:true,
+                            msg:"success"
                         })
                     })
-                }else{
-                    res({
-                        success:true
-                    })
-                }
+                //}else{
+                 //   res({
+                  //      success:true
+                   // })
+                //}
             }
         })
     })
@@ -438,7 +441,8 @@ module.exports = {
     sell,
     accept,
     arrest,
-    bribe
+    bribe,
+    decrease_notoriety
 }
 
 

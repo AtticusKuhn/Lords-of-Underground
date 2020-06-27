@@ -25,10 +25,25 @@ function get_rank_name(level){
 function random_array(array){
     return array[Math.floor(Math.random()*array.length)]
 }
+function size_of_role(guild, role){
+    let size=0
+    ///console.log(guild.members.cache)
+    for(person of guild.members.cache){
+        person = person[1]
+        //console.log(person, "person")
+        if(role){
+            if(guild.member(person).roles.cache.find(r => r.id === role.id)){
+                size++
+            }
+        }
+    }
+    return size
+}
 
 module.exports ={
     array_frequency,
     remove_n,
     get_rank_name,
-    random_array
+    random_array,
+    size_of_role
 }
