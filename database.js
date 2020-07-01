@@ -22,7 +22,8 @@ function get_balance(user_id,Person){
             }else{
                 res({
                     success:true,
-                    balance:user.money
+                    msg:user.money
+                    //balance:user.money
                 })
             }
         })
@@ -218,10 +219,14 @@ async function increase_level(id, Person){
         }
     }
     let person_level = person.level
+    let increase = Math.random()*0.3+0.1
+    if(Math.floor(person_level) != Math.floor(person_level + increase)){
+        
+    }
     if(!person_level){
         person_level = 1
     }else{
-        person_level += Math.random()*0.3+0.1
+        person_level += increase
     }
     let cd = person.cooldown
     cd.level = new Date().getTime()
@@ -229,6 +234,10 @@ async function increase_level(id, Person){
         level: person_level,
         cooldown:cd
     })
+
+    return{
+        success:true
+    }
 }
 async function sell(amount ,item  ,price, person,Offer, Person){
     if(!config.items[item]){
@@ -429,6 +438,67 @@ async function bribe(person, Person, amount){
         msg:"you sucessfully bribed the police"
     }
 }
+async function attack(person, Person, victim, item){
+    if(isNaN(person.health)){
+        await Person.updateOne({ id: person.id}, {
+            health: config.default_health
+        }); 
+    }
+    if(!config.items[item]){
+        return{
+            success:false,
+            msg:"invalid item"
+        }
+    }
+    if(new Date().getTime() - person.cooldown.attack > config.attack_cooldown){
+        return{
+            success:false,
+            msg:"you must wait to attack"
+        }
+    }
+    if(new Date().getTime() - person.cooldown[`attack_${item}`]> config.attack_cooldown/2.4 ){
+        return{
+            success:false,
+            msg:"you must wait to attack with that item"
+        }
+    }
+    if(!victim.match(/\d/g)){
+        return{
+            success:false,
+            msg:"invalid person to attack"
+        }
+    }
+    res =find_person(victim.match(/\d/g)[0],Person)
+    if(!res.success){
+        return{
+            success:false,
+            msg:"can't find victim"
+        }
+    }
+    victim = res.user
+    const base_damage = config.items[item].damage ?  config.items[item].damage[0]:1
+    const variance = config.items[item].damage ?  config.items[item].damage[1]:1
+    const total_damage = Math.floor(base_damage + Math.random()*variance )
+    await Person.updateOne({ id: victim.id}, {
+            health: victim.health-total_damage
+    });
+    if(victim.health-total_damage< 0){
+        await Person.updateOne({ id: victim.id}, {
+            arrested:true
+        });
+        return{
+            success:true,
+            msg:"you killed your victim"
+        }
+    }
+    return{
+        success:true,
+        msg:`you dealt ${total_damage} to your victim`
+    }
+
+
+}
+
 module.exports = {
     get_balance,
     create,
@@ -442,7 +512,8 @@ module.exports = {
     accept,
     arrest,
     bribe,
-    decrease_notoriety
+    decrease_notoriety,
+    attack
 }
 
 

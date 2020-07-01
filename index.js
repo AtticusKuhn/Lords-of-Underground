@@ -6,10 +6,11 @@ require("./server.js")()
 //modules
 const Discord = require('discord.js');
 const client = new Discord.Client();
-
+const crypto = require("crypto")
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_LINK, {useNewUrlParser: true});
 const db = mongoose.connection;
+
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open',async ()=>{
     // we're connected!
@@ -22,7 +23,8 @@ db.once('open',async ()=>{
         arrested:Boolean,
         notoriety: Number,
         cooldown: Object,
-        level:Number
+        level:Number,
+        health:Number
     });
     const Person = mongoose.model('Person', person_schema);
     const market_offer = new mongoose.Schema({
@@ -53,17 +55,18 @@ db.once('open',async ()=>{
         database.increase_level(msg.author.id, Person)
         if(Object.keys(config.commands).includes(command)){
             if(msg_array.length-1 !=config.commands[command].args ){
-                msg.reply("invalid number of arguments")
+                msg.reply(`invalid number of arguments: I expected ${config.commands[command].args}, but got ${msg_array.length-1}`)
                 return
             }
             if(command == "create"){
                 console.log("create")
                 let result =  await database.create(msg.author.id,msg.author.username, Person)
-                if(!result.success){
+                msg.reply(methods.make_embed(result))
+               /* if(!result.success){
                     msg.reply(result.msg)
                     return
                 }
-                msg.reply(result.msg)
+                msg.reply(result.msg)*/
             }
             let person = await database.find_person(msg.author.id,Person)
 
@@ -92,11 +95,12 @@ db.once('open',async ()=>{
             if(command == "balance"){
                 let balance_result= await database.get_balance(msg.author.id,Person, msg_array[1])
                 console.log(balance_result)
-                if(!balance_result.success){
+                msg.reply(methods.make_embed(balance_result))
+                /*if(!balance_result.success){
                     msg.reply(balance_result.msg)
                     return
                 }
-                msg.reply(balance_result.balance)
+                msg.reply(balance_result.balance)*/
 
             }
             
@@ -121,15 +125,17 @@ db.once('open',async ()=>{
 //                        }
 //                    }
                         //console.log(result)
+                    const color_of_role = `#${crypto.randomBytes(3).toString("hex")}`
+                    console.log(color_of_role)
                     let role = await msg.guild.roles.create({
                         data: {
                             name:`gang: ${msg_array[1]}` ,
-                            color: 'BLUE',
+                            color: color_of_role,
                         }
                     })
                     let result = await database.start_gang(msg.author.id, Person, role.id.toString())
                     if(!result.success){
-                        msg.reply(result.msg)
+                        msg.reply(methods.make_embed(result))
                     }
 
                     //console.log( msg.guild.roles.cache)
@@ -145,13 +151,18 @@ db.once('open',async ()=>{
                     msg.guild.member(msg.author).roles.add(role.id);
                     // Create a new channel with permission overwrites
                     let created_channel = await msg.guild.channels.create(msg_array[1].toLowerCase(), {
-                    type: 'text',
-                    permissionOverwrites: [
-                        {
-                        id: msg.author.id,
-                        allow: ['SEND_MESSAGES', "VIEW_CHANNEL"],
-                        },
-                    ],
+                        type: 'text',
+                        permissionOverwrites: [
+                            {
+                                id: msg.author.id,
+                                allow: ['SEND_MESSAGES', "VIEW_CHANNEL","MANAGE_CHANNELS"],
+                            },
+                            {
+                                id:role.id,
+                                allow: ['SEND_MESSAGES', "VIEW_CHANNEL"],
+
+                            }
+                        ],
                     })
                     let category = msg.guild.channels.cache.find(c => c.name == "gangs" && c.type == "category")
                     console.log(category, "category")
@@ -191,11 +202,11 @@ db.once('open',async ()=>{
             }
             if(command == "extort"){
                 let result = await database.extort(msg.author.id,Person)
-                msg.reply(result.msg)
+                msg.reply(methods.make_embed(result))
             }
             if(command.startsWith("make")){
                 let result = await database.make(msg.author.id ,Person, msg_array[1])
-                msg.reply(result.msg)
+                msg.reply(methods.make_embed(result))
             }
             if(command =="market"){
                // let result = await database.get_market(Person,Offer)
@@ -212,15 +223,19 @@ db.once('open',async ()=>{
             }
             if(command.startsWith("sell")){
                 let result = await database.sell(msg_array[1],msg_array[2] ,msg_array[3],person,Offer,Person)
-                msg.reply(result.msg)
+                msg.reply(methods.make_embed(result))
             }
             if(command.startsWith("accept")){
                 let result = await database.accept(msg_array[1], person, Person, Offer)
-                msg.reply(result.msg)
+                msg.reply(methods.make_embed(result))
             }
             if(command.startsWith("bribe")){
                 let result = await database.bribe(person,Person, msg_array[1])
-                msg.reply(result.msg)
+                msg.reply(methods.make_embed(result))
+            }
+            if(command.startsWith("attack")){
+                let result =await database.attack(person, Person,msg_array[1], msg_array[2])
+                msg.reply(methods.make_embed(result))
             }
         }
     });

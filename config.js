@@ -56,6 +56,10 @@ const config = {
                 Github repository link - https://github.com/eulerthedestroyer/Lords-of-Underground
             `,
             args:0
+        },
+        "attack":{
+            desc:"attack another person",
+            args:2
         }
     },
     items:{
@@ -64,7 +68,8 @@ const config = {
             make_coolown:100,
             use_cooldown:100,
             item_requirements:["gunlab"],
-            makeable:true
+            makeable:true,
+            damage:[1,2]
         },
         gunlab:{
             desc:"allows you to make guns",
@@ -75,6 +80,7 @@ const config = {
     extort_cooldown:10e3,
     exort_payoff: Math.floor(Math.random()*10+10),
     level_cooldown:3600e3,
+    attack_cooldown: 10e3,
     level_rewards:[
         "gun lab"
     ],
@@ -92,7 +98,10 @@ const config = {
         "extort",
         "make",
         "sell",
-        "accept"
-    ]
+        "accept",
+        "attack"
+    ],
+    default_health:15
+
 }
 module.exports = config

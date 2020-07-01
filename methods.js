@@ -1,4 +1,5 @@
 const config = require("./config")
+const Discord = require('discord.js');
 
 function array_frequency(arr){
     //var arr = [5, 5, 5, 2, 2, 2, 2, 2, 9, 4];
@@ -40,10 +41,27 @@ function size_of_role(guild, role){
     return size
 }
 
+function make_embed(result){
+// inside a command, event listener, etc.
+    const exampleEmbed = new Discord.MessageEmbed()
+        .setColor( result.success ? '#3DFC2F' :"#FF051E" )
+        .setTitle('Lords of Underground')
+        .setURL('https://github.com/eulerthedestroyer/Lords-of-Underground')
+        .setThumbnail('https://cdn.discordapp.com/attachments/723966487773184050/723966917165056060/lords_of_underground.png')
+        .addFields(
+            { name: `Result: ${result.success}`, value: result.msg},
+            { name: '\u200B', value: '\u200B' },
+        )
+       // .setImage('https://i.imgur.com/wSTFkRM.png')
+        .setTimestamp()
+        .setFooter('Source code', 'https://github.com/eulerthedestroyer/Lords-of-Underground');
+    return exampleEmbed
+}
 module.exports ={
     array_frequency,
     remove_n,
     get_rank_name,
     random_array,
-    size_of_role
+    size_of_role,
+    make_embed
 }
