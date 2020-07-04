@@ -55,7 +55,26 @@ client.on('message', async (msg) => {
     database.increase_level(msg.author.id, Person)
     if(Object.keys(config.commands).includes(command)){
         if(msg_array.length-1 !=config.commands[command].args ){
-            msg.reply(`invalid number of arguments: I expected ${config.commands[command].args}, but got ${msg_array.length-1}`)
+            const levelEmbed = {
+                color: 0xff0000,
+                title: 'Lords of Underground',
+                url: 'https://github.com/eulerthedestroyer/Lords-of-Underground',
+                thumbnail: {
+                    url: 'https://cdn.discordapp.com/attachments/723966487773184050/723966917165056060/lords_of_underground.png',
+                },
+                fields: [
+                    {
+                        name:"ERROR: Wrong Number of Arguments Given",
+                        value:`invalid number of arguments: I expected ${config.commands[command].args}, but got ${msg_array.length-1}`
+                    }
+                ],
+                timestamp: new Date(),
+                footer: {
+                    text: 'Made by Euler and B2',
+                    icon_url: 'https://cdn.discordapp.com/attachments/723966487773184050/723966917165056060/lords_of_underground.png',
+                },
+            };
+            msg.reply({ embed: levelEmbed });
             return
         }
         if(command == "create"){
@@ -77,7 +96,26 @@ client.on('message', async (msg) => {
         person = person.user
 
         if(config.commands[command].level > person.level){
-            msg.reply(`Insufficent levels: you must be of rank ${config.commands[command].level} ${methods.get_rank_name(config.commands[command].level)}, but you are only at rank, ${person.level} ${methods.get_rank_name(person.level)}`)
+            const levelEmbed = {
+                color: 0xff0000,
+                title: 'Lords of Underground',
+                url: 'https://github.com/eulerthedestroyer/Lords-of-Underground',
+                thumbnail: {
+                    url: 'https://cdn.discordapp.com/attachments/723966487773184050/723966917165056060/lords_of_underground.png',
+                },
+                fields: [
+                    {
+                        name:"ERROR: Insufficient Levels",
+                        value:`Insufficent levels: you must be of rank ${config.commands[command].level} ${methods.get_rank_name(config.commands[command].level)}, but you are only at rank, ${person.level} ${methods.get_rank_name(person.level)}`
+                    }
+                ],
+                timestamp: new Date(),
+                footer: {
+                    text: 'Made by Euler and B2',
+                    icon_url: 'https://cdn.discordapp.com/attachments/723966487773184050/723966917165056060/lords_of_underground.png',
+                },
+            };
+            msg.reply({ embed: levelEmbed });
             return
         }
         if(person.arrested && config.illicit_commands.indexOf(command) > -1){
@@ -219,11 +257,34 @@ client.on('message', async (msg) => {
         if(command == "profile"){
             let result = await database.find_person(msg.author.id,Person)
             if(result.success){
+
                 let formatted = JSON.parse(JSON.stringify(result.user))
                 formatted.rank = `rank ${formatted.level} ${methods.get_rank_name(formatted.level)}`
                 console.log(formatted)
                 delete  formatted.level
-                msg.reply(JSON.stringify(formatted,null,4))
+                let fields = []
+                for(key of Object.keys(formatted)){
+                    fields.push({
+                        name:key,
+                        value:formatted[key]
+                    })
+                }
+                const profileEmbed = {
+                    color: 0x0099ff,
+                    title: 'Lords of Underground',
+                    url: 'https://github.com/eulerthedestroyer/Lords-of-Underground',
+                    thumbnail: {
+                        url: 'https://cdn.discordapp.com/attachments/723966487773184050/723966917165056060/lords_of_underground.png',
+                    },
+                    fields: fields,
+                    timestamp: new Date(),
+                    footer: {
+                        text: 'Made by Euler and B2',
+                        icon_url: 'https://cdn.discordapp.com/attachments/723966487773184050/723966917165056060/lords_of_underground.png',
+                    },
+                };
+                msg.reply({ embed: profileEmbed });
+                //msg.reply(JSON.stringify(formatted,null,4))
             }
         }
         if(command == "extort"){
@@ -261,6 +322,18 @@ client.on('message', async (msg) => {
         }
         if(command.startsWith("attack")){
             let result =await database.attack(person, Person,msg_array[1], msg_array[2])
+            msg.reply(methods.make_embed(result))
+        }
+        if(command == "info"){
+            let result = {
+                success:true,
+                msg:`
+                This bot was designed by eulerthedestroyer#2074 and thought of by TheB2#3417.
+                Bot invite link - https://discord.com/oauth2/authorize?scope=bot&client_id=723983871770755123&permissions=268470288
+                Server invite link - https://discord.gg/TBaXkWg.
+                Github repository link - https://github.com/eulerthedestroyer/Lords-of-Underground
+            `
+            }
             msg.reply(methods.make_embed(result))
         }
     }

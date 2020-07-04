@@ -23,7 +23,7 @@ const config = {
         "extort":{
             desc:"extort a business for money",
             args:0,
-            level: 0.3
+            level: 0.4
         },
         "make":{
             desc:"create illicit substances such as guns or drugs",
@@ -49,12 +49,7 @@ const config = {
             args:1
         },
         "info":{
-            desc:`
-                This bot was designed by eulerthedestroyer#2074 and thought of by TheB2#3417.
-                Bot invite link - https://discord.com/oauth2/authorize?scope=bot&client_id=723983871770755123&permissions=268470288
-                Server invite link - https://discord.gg/TBaXkWg.
-                Github repository link - https://github.com/eulerthedestroyer/Lords-of-Underground
-            `,
+            desc:"see infomation on this project",
             args:0
         },
         "attack":{
