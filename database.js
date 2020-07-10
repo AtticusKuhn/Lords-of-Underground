@@ -51,9 +51,12 @@ function create(id,name, Person){
                             gang: "",
                             arrested:false,
                             notoriety: 0,
-                            name: String,
-                            cooldown:{},
-                            level:0
+                            cooldown:{
+                                level:new Date().getTime(),
+                                attack:new Date().getTime()
+                            },
+                            level:0,
+                            health:15
                         }
                     }
                 }]).then(result=>{
@@ -215,7 +218,7 @@ async function increase_level(id, Person){
     if(new Date().getTime() - person.cooldown.level < config.level_cooldown ){
         return {
             success:false,
-            msg:"wait a bit longer"
+            msg:`you must wait ${(config.level_cooldown - (new Date().getTime() - person.cooldown.level))/1000 } seconds to level up again `
         }
     }
     let person_level = person.level
@@ -236,7 +239,8 @@ async function increase_level(id, Person){
     })
 
     return{
-        success:true
+        success:true,
+        msg:`your level increased by ${increase} to ${person_level}`
     }
 }
 async function sell(amount ,item  ,price, person,Offer, Person){
@@ -468,7 +472,9 @@ async function attack(person, Person, victim, item){
             msg:"invalid person to attack"
         }
     }
-    res =find_person(victim.match(/\d/g)[0],Person)
+    console.log(victim.match(/\d+/g)[0])
+    res =await find_person(victim.match(/\d+/g)[0],Person)
+    console.log(res)
     if(!res.success){
         return{
             success:false,
@@ -479,6 +485,7 @@ async function attack(person, Person, victim, item){
     const base_damage = config.items[item].damage ?  config.items[item].damage[0]:1
     const variance = config.items[item].damage ?  config.items[item].damage[1]:1
     const total_damage = Math.floor(base_damage + Math.random()*variance )
+    console.log(total_damage, victim.health)
     await Person.updateOne({ id: victim.id}, {
             health: victim.health-total_damage
     });

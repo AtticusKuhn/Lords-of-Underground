@@ -35,6 +35,7 @@ const market_offer = new mongoose.Schema({
     short_id:String
 });
 const Offer = mongoose.model('Offer', market_offer);
+//await Person.deleteOne({id:"702676474834190356"})
 
 //start bot
 client.on('ready', () => {
@@ -47,12 +48,16 @@ client.on('message', async (msg) => {
     if(msg.author.bot){
         return
     }
+    msg.content=msg.content.replace(/\s{2,}/g," ")
     const msg_array = msg.content.split(" ")
     let command =msg_array[0]
     command = command.toLowerCase()
 
     //valid command
-    database.increase_level(msg.author.id, Person)
+    let inc_level_res = await database.increase_level(msg.author.id, Person)
+   // if(inc_level_res.success){
+        msg.reply(methods.make_embed(inc_level_res))
+    //}
     if(Object.keys(config.commands).includes(command)){
         if(msg_array.length-1 !=config.commands[command].args ){
             const levelEmbed = {
@@ -90,7 +95,11 @@ client.on('message', async (msg) => {
         let person = await database.find_person(msg.author.id,Person)
 
         if(!person.success && command != "create"){
-            msg.reply("you don't have an account")
+            msg.reply(methods.make_embed({
+                success:false,
+                msg:"you don't have an account. If you want to create an account, type 'create'. "
+            }))
+
             return
         }
         person = person.user
@@ -123,7 +132,7 @@ client.on('message', async (msg) => {
             return
         }
         //background services
-        database.add_fake_offer(Offer)
+        //database.add_fake_offer(Offer)
         if(config.illicit_commands.indexOf(command) > -1){
             if(await database.arrest(person, Person)){
                 msg.reply("you have been arrested")
@@ -260,15 +269,24 @@ client.on('message', async (msg) => {
 
                 let formatted = JSON.parse(JSON.stringify(result.user))
                 formatted.rank = `rank ${formatted.level} ${methods.get_rank_name(formatted.level)}`
-                console.log(formatted)
+                formatted.gang= `<@${formatted.gang}>`
+                formatted.cooldown = JSON.stringify(formatted.cooldown)
                 delete  formatted.level
                 let fields = []
                 for(key of Object.keys(formatted)){
+                    
+                    if(typeof formatted[key] !== "string"){
+                        formatted[key] = formatted[key].toString()
+                    }
+                    if(formatted[key] === ''){
+                        formatted[key] = "(nothing here)"
+                    }
                     fields.push({
                         name:key,
                         value:formatted[key]
                     })
                 }
+                console.log(formatted,"formatted")
                 const profileEmbed = {
                     color: 0x0099ff,
                     title: 'Lords of Underground',
@@ -335,6 +353,21 @@ client.on('message', async (msg) => {
             `
             }
             msg.reply(methods.make_embed(result))
+        }
+        if(command.startsWith("dev-set")){
+            if(!msg.author.id =="464954455029317633"){
+                return
+            }
+            let altering_person = await database.find_person(msg_array[1],Person)
+            altering_person = altering_person.user            
+            console.log(altering_person)
+            let new_value = {}
+            new_value[msg_array[2]] =msg_array[3]
+            console.log(new_value)
+
+            await Person.updateOne({ id: altering_person.id}, new_value);
+
+            
         }
     }
 });

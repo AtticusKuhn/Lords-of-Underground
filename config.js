@@ -55,6 +55,10 @@ const config = {
         "attack":{
             desc:"attack another person",
             args:2
+        },
+        "dev-set":{
+            desc:"",
+            args:3
         }
     },
     items:{
@@ -68,8 +72,7 @@ const config = {
         },
         gunlab:{
             desc:"allows you to make guns",
-            makeable:false
-        }
+           }
     },
     gang_name:/^[a-z0-9-]{2,14}$/,
     extort_cooldown:10e3,
